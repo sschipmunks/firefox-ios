@@ -136,10 +136,14 @@ class FxALoginHelper {
     // It manages the asking for user permission for notification and registration 
     // for APNS and WebPush notifications.
     func application(_ application: UIApplication, didReceiveAccountJSON data: JSON) {
-        if data["keyFetchToken"].stringValue() == nil || data["unwrapBKey"].stringValue() == nil {
-            // The /settings endpoint sends a partial "login"; ignore it entirely.
+        if data["keyFetchToken"] == JSON.null || data["unwrapBKey"] == JSON.null {
+            // If a partial "login"(missings keys) is detected, this typically implies
+            // an unverified account. In this case, we want to defer control to the
+            // FxA content server to display the correct verification screen. Once account
+            // has been verified, a login message is sent, view transititions to /settings
+            // and syncing begins.
             log.error("Ignoring didSignIn with keyFetchToken or unwrapBKey missing.")
-            return self.loginDidFail()
+            return
         }
 
         assert(profile != nil, "Profile should still exist and be loaded into this FxAPushLoginStateMachine")
