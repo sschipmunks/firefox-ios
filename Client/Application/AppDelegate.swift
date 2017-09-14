@@ -173,6 +173,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UIViewControllerRestorati
         }
 
         NotificationCenter.default.addObserver(forName: NotificationFirefoxAccountDeviceRegistrationUpdated, object: nil, queue: nil) { _ in
+            self.updateSyncScratchpad()
+
             profile.flushAccount()
         }
 
@@ -201,6 +203,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UIViewControllerRestorati
             sendCorePing()
         }
 
+        // We should check if deviceRegistration has been performed, and
+        // update the sync scratch pad (a proxy for our client record) accordingly.
+        // We do this here because this is effectively the upgrade path between 7 and 8.
+        updateSyncScratchpad()
+
         let fxaLoginHelper = FxALoginHelper.sharedInstance
         fxaLoginHelper.application(application, didLoadProfile: profile)
 
@@ -208,6 +215,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UIViewControllerRestorati
 
         log.debug("Done with setting up the application.")
         return true
+    }
+
+    fileprivate func updateSyncScratchpad() {
+        // We need to associate the fxaDeviceId with sync;
+        // We can do this anything after the first time we account.advance()
+        // but before the first time we sync.
+        if let deviceRegistration = profile?.getAccount()?.deviceRegistration,
+            let scratchpadPrefs = profile?.prefs.branch("sync.scratchpad") {
+            scratchpadPrefs.setString(deviceRegistration.toJSON().stringValue()!, forKey: PrefDeviceRegistration)
+        }
     }
 
     func setUpDeepLinks(application: UIApplication) {
