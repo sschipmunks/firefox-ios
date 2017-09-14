@@ -63,7 +63,7 @@ extension PhotonActionSheetProtocol {
             openURL(HomePanelType.readingList.localhostURL, false)
         }
         
-        return [openSettings, openTopSites, openBookmarks, openHistory, openReadingList]
+        return [openTopSites, openBookmarks, openHistory, openReadingList]
     }
     
     /*
@@ -158,7 +158,7 @@ extension PhotonActionSheetProtocol {
         if let tab = self.tabManager.selectedTab, tab.readerModeAvailable {
             topActions.append(addReadingList)
         }
-        return [topActions, [findInPageAction, toggleDesktopSite, setHomePage], [share, copyURL]]
+        return [topActions, [copyURL, findInPageAction, toggleDesktopSite, setHomePage], [share]]
     }
     
     func getTabMenuActions(openURL: @escaping URLOpenAction, showTabs showTabsTrayAction: @escaping MenuAction) -> [PhotonActionSheetItem] {
