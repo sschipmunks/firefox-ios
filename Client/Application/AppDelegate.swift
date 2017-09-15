@@ -174,6 +174,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UIViewControllerRestorati
 
         NotificationCenter.default.addObserver(forName: NotificationFirefoxAccountDeviceRegistrationUpdated, object: nil, queue: nil) { _ in
             profile.flushAccount()
+            profile.syncManager.syncEverything(why: .didLogin)
         }
 
         // check to see if we started 'cos someone tapped on a notification.
