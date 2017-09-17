@@ -42,7 +42,7 @@ struct TabsButtonUX {
     }()
 }
 
-class TabsButton: UIControl {
+class TabsButton: UIButton {
     fileprivate var theme: Theme = TabsButtonUX.Themes[Theme.NormalMode]!
     
     override var isHighlighted: Bool {
@@ -65,9 +65,10 @@ class TabsButton: UIControl {
         }
     }
 
-    lazy var titleLabel: UILabel = {
+    override lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = TabsButtonUX.TitleFont
+        label.text = "8"
         label.layer.cornerRadius = TabsButtonUX.CornerRadius
         label.textAlignment = NSTextAlignment.center
         label.isUserInteractionEnabled = false
@@ -121,7 +122,8 @@ class TabsButton: UIControl {
             make.edges.equalTo(insideButton)
         }
         insideButton.snp.remakeConstraints { (make) -> Void in
-            make.edges.equalTo(self).inset(TabsButtonUX.TitleInsets)
+            make.size.equalTo(24)
+            make.center.equalTo(self)
         }
     }
 

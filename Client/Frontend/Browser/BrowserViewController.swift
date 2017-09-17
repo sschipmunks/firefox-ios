@@ -856,21 +856,6 @@ class BrowserViewController: UIViewController {
         }
     }
 
-    fileprivate func animateBookmarkStar() {
-        let offset: CGFloat
-        let button: UIButton!
-
-        if let toolbar: TabToolbar = self.toolbar {
-            offset = BrowserViewControllerUX.BookmarkStarAnimationOffset * -1
-            button = toolbar.bookmarkButton
-        } else {
-            offset = BrowserViewControllerUX.BookmarkStarAnimationOffset
-            button = self.urlBar.bookmarkButton
-        }
-
-        JumpAndSpinAnimator.animateFromView(button.imageView ?? button, offset: offset, completion: nil)
-    }
-
     func SELBookmarkStatusDidChange(_ notification: Notification) {
         if let bookmark = notification.object as? BookmarkItem {
             if bookmark.url == urlBar.currentURL?.absoluteString {
@@ -1357,7 +1342,16 @@ extension BrowserViewController: URLBarDelegate {
     }
 
     func urlBarDidPressTabs(_ urlBar: URLBarView) {
-        showTabTray()
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to:nil, from:nil, for:nil)
+        var actions: [[PhotonActionSheetItem]] = []
+        
+        let urlAction = { (url, isPrivate) in
+            self.openURLInNewTab(url, isPrivate: isPrivate, isPrivileged: true)
+        }
+        
+        actions.append(getOtherPanelActions())
+        actions.append(getHomePanelActions(openURL: urlAction, vcDelegate: self))
+        presentSheetWith(actions: actions, on: self, from: urlBar)
     }
 
     func urlBarDidPressReaderMode(_ urlBar: URLBarView) {
@@ -1542,6 +1536,10 @@ extension BrowserViewController: TabToolbarDelegate, PhotonActionSheetProtocol {
     func tabToolbarDidLongPressBack(_ tabToolbar: TabToolbarProtocol, button: UIButton) {
         showBackForwardList()
     }
+    
+    func tabToolbarDidPressTabs(_ tabToolbar: TabToolbarProtocol, button: UIButton) {
+        showTabTray()
+    }
 
     func tabToolbarDidPressReload(_ tabToolbar: TabToolbarProtocol, button: UIButton) {
         tabManager.selectedTab?.reload()
@@ -1582,17 +1580,7 @@ extension BrowserViewController: TabToolbarDelegate, PhotonActionSheetProtocol {
 
     func tabToolbarDidPressMenu(_ tabToolbar: TabToolbarProtocol, button: UIButton) {
         // ensure that any keyboards or spinners are dismissed before presenting the menu
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to:nil, from:nil, for:nil)
-        var actions: [[PhotonActionSheetItem]] = []
-        
-        let urlAction = { (url, isPrivate) in
-            self.openURLInNewTab(url, isPrivate: isPrivate, isPrivileged: true)
-        }
-        
-        actions.append(getOtherPanelActions())
-        actions.append(getHomePanelActions(openURL: urlAction, vcDelegate: self))
-        actions.append(getTabMenuActions(openURL: urlAction, showTabs: showTabTray))
-        presentSheetWith(actions: actions, on: self, from: button)
+        showTabTray()
     }
 
     func tabToolbarDidPressShare(_ tabToolbar: TabToolbarProtocol, button: UIButton) {

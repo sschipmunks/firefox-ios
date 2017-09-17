@@ -137,8 +137,11 @@ class URLBarView: UIView {
     
     let line = UIView()
 
-    fileprivate lazy var tabsButton: TabsButton = {
-        let tabsButton = TabsButton.tabTrayButton()
+    fileprivate lazy var tabsButton: UIButton = {
+        let tabsButton = ToolbarButton()
+        tabsButton.tintColor = UIColor(rgb: 0x272727)
+        tabsButton.unselectedTintColor  = UIColor(rgb: 0x272727)
+        tabsButton.setImage(UIImage.templateImageNamed("nav-menu"), for: .normal)
         tabsButton.addTarget(self, action: #selector(URLBarView.SELdidClickAddTab), for: .touchUpInside)
         tabsButton.accessibilityIdentifier = "URLBarView.tabsButton"
         return tabsButton
@@ -177,7 +180,7 @@ class URLBarView: UIView {
     }()
 
     var shareButton: UIButton = ToolbarButton()
-    var menuButton: UIButton = ToolbarButton()
+    var menuButton: TabsButton = TabsButton()
     var bookmarkButton: UIButton = ToolbarButton()
     var forwardButton: UIButton = ToolbarButton()
     var stopReloadButton: UIButton = ToolbarButton()
@@ -408,7 +411,7 @@ class URLBarView: UIView {
     }
 
     func updateTabCount(_ count: Int, animated: Bool = true) {
-        self.tabsButton.updateTabCount(count, animated: animated)
+     //   self.tabsButton.updateTabCount(count, animated: animated)
     }
 
     func updateProgressBar(_ progress: Float) {
@@ -561,6 +564,7 @@ class URLBarView: UIView {
 }
 
 extension URLBarView: TabToolbarProtocol {
+    
     func updateBackStatus(_ canGoBack: Bool) {
         backButton.isEnabled = canGoBack
     }
@@ -727,7 +731,7 @@ extension URLBarView: Themeable {
         actionButtonSelectedTintColor = theme.highlightButtonColor
         actionButtonDisabledTintColor = theme.disabledButtonColor!
         backgroundColor = theme.backgroundColor
-        tabsButton.applyTheme(themeName)
+     //   tabsButton.applyTheme(themeName)
         line.backgroundColor = UIConstants.URLBarDivider.color(isPBM: isPrivate)
         locationContainer.layer.shadowColor = self.locationBorderColor.cgColor
     }

@@ -13,8 +13,8 @@ private let log = Logger.browserLogger
 protocol TabToolbarProtocol: class {
     weak var tabToolbarDelegate: TabToolbarDelegate? { get set }
     var shareButton: UIButton { get }
-    var bookmarkButton: UIButton { get }
-    var menuButton: UIButton { get }
+
+    var menuButton: TabsButton { get }
     var forwardButton: UIButton { get }
     var backButton: UIButton { get }
     var stopReloadButton: UIButton { get }
@@ -22,7 +22,6 @@ protocol TabToolbarProtocol: class {
 
     func updateBackStatus(_ canGoBack: Bool)
     func updateForwardStatus(_ canGoForward: Bool)
-    func updateBookmarkStatus(_ isBookmarked: Bool)
     func updateReloadStatus(_ isLoading: Bool)
     func updatePageStatus(_ isWebPage: Bool)
 }
@@ -36,6 +35,7 @@ protocol TabToolbarDelegate: class {
     func tabToolbarDidLongPressReload(_ tabToolbar: TabToolbarProtocol, button: UIButton)
     func tabToolbarDidPressStop(_ tabToolbar: TabToolbarProtocol, button: UIButton)
     func tabToolbarDidPressMenu(_ tabToolbar: TabToolbarProtocol, button: UIButton)
+    func tabToolbarDidPressTabs(_ tabToolbar: TabToolbarProtocol, button: UIButton)
     func tabToolbarDidPressShare(_ tabToolbar: TabToolbarProtocol, button: UIButton)
 }
 
@@ -48,19 +48,19 @@ open class TabToolbarHelper: NSObject {
 
     var buttonTintColor = UIColor.darkGray {
         didSet {
-            setTint(color: buttonTintColor, selectedColor: selectedButtonTintColor, andDisabledColor: disabledButtonTintColor, forButtons: toolbar.actionButtons)
+            setTint(color: buttonTintColor, selectedColor: selectedButtonTintColor, andDisabledColor: disabledButtonTintColor, forButtons: [toolbar.backButton, toolbar.forwardButton, toolbar.stopReloadButton, toolbar.shareButton])
         }
     }
 
     var selectedButtonTintColor = UIColor.darkGray {
         didSet {
-            setTint(color: buttonTintColor, selectedColor: selectedButtonTintColor, andDisabledColor: disabledButtonTintColor, forButtons: toolbar.actionButtons)
+            setTint(color: buttonTintColor, selectedColor: selectedButtonTintColor, andDisabledColor: disabledButtonTintColor, forButtons: [toolbar.backButton, toolbar.forwardButton, toolbar.stopReloadButton, toolbar.shareButton])
         }
     }
     
     var disabledButtonTintColor = UIColor.lightGray {
         didSet {
-            setTint(color: buttonTintColor, selectedColor: selectedButtonTintColor, andDisabledColor: disabledButtonTintColor, forButtons: toolbar.actionButtons)
+            setTint(color: buttonTintColor, selectedColor: selectedButtonTintColor, andDisabledColor: disabledButtonTintColor, forButtons: [toolbar.backButton, toolbar.forwardButton, toolbar.stopReloadButton, toolbar.shareButton])
         }
     }
 
@@ -103,16 +103,15 @@ open class TabToolbarHelper: NSObject {
         toolbar.stopReloadButton.addGestureRecognizer(longPressGestureStopReloadButton)
         toolbar.stopReloadButton.addTarget(self, action: #selector(TabToolbarHelper.SELdidClickStopReload), for: UIControlEvents.touchUpInside)
 
-        toolbar.shareButton.setImage(UIImage.templateImageNamed("nav-share"), for: .normal)
+        toolbar.shareButton.setImage(UIImage.templateImageNamed("menu-More-Options"), for: .normal)
         toolbar.shareButton.accessibilityLabel = NSLocalizedString("Share", comment: "Accessibility Label for the tab toolbar Share button")
         toolbar.shareButton.addTarget(self, action: #selector(TabToolbarHelper.SELdidClickShare), for: UIControlEvents.touchUpInside)
 
         toolbar.menuButton.contentMode = UIViewContentMode.center
-        toolbar.menuButton.setImage(UIImage.templateImageNamed("nav-menu"), for: .normal)
         toolbar.menuButton.accessibilityLabel = Strings.AppMenuButtonAccessibilityLabel
         toolbar.menuButton.addTarget(self, action: #selector(TabToolbarHelper.SELdidClickMenu), for: UIControlEvents.touchUpInside)
         toolbar.menuButton.accessibilityIdentifier = "TabToolbar.menuButton"
-        setTint(color: buttonTintColor, selectedColor: selectedButtonTintColor, andDisabledColor: disabledButtonTintColor, forButtons: toolbar.actionButtons)
+        setTint(color: buttonTintColor, selectedColor: selectedButtonTintColor, andDisabledColor: disabledButtonTintColor, forButtons: [toolbar.backButton, toolbar.forwardButton, toolbar.stopReloadButton, toolbar.shareButton])
     }
 
     func SELdidClickBack() {
@@ -140,7 +139,7 @@ open class TabToolbarHelper: NSObject {
     }
 
     func SELdidClickMenu() {
-        toolbar.tabToolbarDelegate?.tabToolbarDidPressMenu(toolbar, button: toolbar.menuButton)
+        toolbar.tabToolbarDelegate?.tabToolbarDidPressMenu(toolbar, button: toolbar.forwardButton)
     }
 
     func SELdidClickStopReload() {
@@ -198,8 +197,7 @@ class TabToolbar: Toolbar, TabToolbarProtocol {
     weak var tabToolbarDelegate: TabToolbarDelegate?
 
     let shareButton: UIButton
-    let bookmarkButton: UIButton
-    let menuButton: UIButton
+    let menuButton: TabsButton
     let forwardButton: UIButton
     let backButton: UIButton
     let stopReloadButton: UIButton
@@ -237,9 +235,7 @@ class TabToolbar: Toolbar, TabToolbarProtocol {
         stopReloadButton.accessibilityIdentifier = "TabToolbar.stopReloadButton"
         shareButton = ToolbarButton()
         shareButton.accessibilityIdentifier = "TabToolbar.shareButton"
-        bookmarkButton = ToolbarButton()
-        bookmarkButton.accessibilityIdentifier = "TabToolbar.bookmarkButton"
-        menuButton = ToolbarButton()
+        menuButton = TabsButton()
         menuButton.accessibilityIdentifier = "TabToolbar.menuButton"
         actionButtons = [backButton, forwardButton, stopReloadButton, shareButton, menuButton]
 
@@ -263,10 +259,6 @@ class TabToolbar: Toolbar, TabToolbarProtocol {
 
     func updateForwardStatus(_ canGoForward: Bool) {
         forwardButton.isEnabled = canGoForward
-    }
-
-    func updateBookmarkStatus(_ isBookmarked: Bool) {
-        bookmarkButton.isSelected = isBookmarked
     }
 
     func updateReloadStatus(_ isLoading: Bool) {

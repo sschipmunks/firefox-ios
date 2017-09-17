@@ -63,7 +63,7 @@ extension PhotonActionSheetProtocol {
             openURL(HomePanelType.readingList.localhostURL, false)
         }
         
-        return [openTopSites, openBookmarks, openHistory, openReadingList]
+        return [openSettings, openTopSites, openBookmarks, openHistory, openReadingList]
     }
     
     /*
@@ -162,7 +162,7 @@ extension PhotonActionSheetProtocol {
     }
     
     func getTabMenuActions(openURL: @escaping URLOpenAction, showTabs showTabsTrayAction: @escaping MenuAction) -> [PhotonActionSheetItem] {
-        
+        return []
         let openHomePage = PhotonActionSheetItem(title: Strings.AppMenuOpenHomePageTitleString, iconString: "menu-Home") { _ in
             guard let tab = self.tabManager.selectedTab else { return }
             HomePageHelper(prefs: self.profile.prefs).openHomePage(tab)
